@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ent_background_dark"
+    tools:context="com.entourage.app.NavigationDrawerFragment"
+    android:orientation="vertical"
+    android:weightSum="1"
+    android:paddingTop="12dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/profile_image_width"
+            android:layout_height="@dimen/profile_image_width"
+            android:id="@+id/profile_picture"
+            android:src="@drawable/ic_monkey_headphone"
+            android:background="@drawable/image_view_shadow_border"/>
+    </LinearLayout>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/navigation_list"
+        android:divider="@drawable/list_view_divider"
+        android:dividerHeight="1px"
+        android:drawSelectorOnTop="false"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:stackFromBottom="true"
+        android:id="@+id/settings_list"
+        android:divider="@null"/>
+</LinearLayout>
