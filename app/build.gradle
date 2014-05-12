@@ -20,4 +20,6 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:+'
+    compile files('../libs/com.haarman.listviewanimations-2.6.0.jar')
+    compile files('../libs/nineoldandroids-2.4.0.jar')
 }

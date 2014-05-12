@@ -21,5 +21,15 @@
         android:layout_alignParentEnd="true"
         android:autoText="false"
         android:singleLine="true"
+        android:layout_marginBottom="18dp"
         android:hint="@string/search_place_hint"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/placesList"
+        android:dividerHeight="0dp"
+        android:divider="@null"
+        android:fastScrollEnabled="false"
+        android:scrollbars="none"></ListView>
 </LinearLayout>

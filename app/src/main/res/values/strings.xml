@@ -15,4 +15,8 @@
     <string name="title_settings">Préférences</string>
 
     <string name="search_place_hint">Rechercher un lieu...</string>
+    <string name="tap_to_undo">Tap to undo</string>
+    <string name="item_deleted">Item deleted</string>
+    <string name="place_default_distance">Distance: too far</string>
+
 </resources>

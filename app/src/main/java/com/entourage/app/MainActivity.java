@@ -9,6 +9,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.entourage.app.com.entourage.app.places.FragmentPlaces;
+
 import java.util.HashMap;
 
 public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
