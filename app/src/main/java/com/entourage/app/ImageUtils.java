@@ -1,5 +1,6 @@
 package com.entourage.app;
 
+import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;

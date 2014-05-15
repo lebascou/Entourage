@@ -21,4 +21,6 @@
     <string name="item_deleted">Item deleted</string>
     <string name="place_default_distance">Distance: too far</string>
 
+    <string name="age_suffix">ans</string>
+
 </resources>

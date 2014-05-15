@@ -3,5 +3,5 @@
     <color name="ent_background_dark">#2D485F</color>
     <color name="ent_foreground_dark">#2D485F</color>
     <color name="ent_foreground_white">#FAFAFA</color>
-    <color name="ent_background_white">#F0F0F0</color>
+    <color name="ent_background_white">#FAFAFA</color>
 </resources>

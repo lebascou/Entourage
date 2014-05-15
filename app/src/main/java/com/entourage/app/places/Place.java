@@ -1,4 +1,4 @@
-package com.entourage.app.com.entourage.app.places;
+package com.entourage.app.places;
 
 /**
  * Created by Fabrice on 5/12/14.

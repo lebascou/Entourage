@@ -1,4 +1,4 @@
-package com.entourage.app.com.entourage.app.places;
+package com.entourage.app.places;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;

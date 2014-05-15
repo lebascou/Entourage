@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.entourage.app.auth.LoginActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -17,6 +17,9 @@
         </activity>
         <activity android:name="com.facebook.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:label="@string/app_name" />
+        <activity android:name="com.entourage.app.MainActivity"
+            android:theme="@style/AppTheme"
             android:label="@string/app_name" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_fb_id" />
 

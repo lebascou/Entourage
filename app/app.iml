@@ -73,7 +73,6 @@
     <orderEntry type="library" exported="" name="com.haarman.listviewanimations-2.6.0" level="project" />
     <orderEntry type="library" exported="" name="nineoldandroids-2.4.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-4.3.23" level="project" />
     <orderEntry type="library" exported="" name="bolts" level="project" />
     <orderEntry type="module" module-name="facebook" exported="" />
   </component>
