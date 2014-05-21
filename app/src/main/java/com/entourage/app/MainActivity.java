@@ -124,13 +124,9 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
             // if profile doesnt exist (first user log in)
             // create one (load from facebook api)
-            if (true || mProfile == null) // TODO: remove true (test purpose)
+            if (mProfile == null)
             {
                 mProfile = Profile.initFromFbApi(getSharedPreferences(Profile.PREFS_USER_PROFILE, 0), session);
-            }
-            else
-            {
-                mProfile.loadFromMemory();
             }
 
             Bundle bundle = new Bundle();
@@ -158,7 +154,8 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
             mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
                     (DrawerLayout) findViewById(R.id.drawer_layout));
-            onNavigationDrawerItemSelected(getString(R.string.title_places));
+            mNavigationDrawerFragment.setProfilePicture(mProfile.getProfilePicture(0));
+            onNavigationDrawerItemSelected(getString(R.string.title_profile));
         }
 
         @Override

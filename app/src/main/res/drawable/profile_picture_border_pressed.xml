@@ -11,8 +11,8 @@
     <item>
         <shape
             android:shape="oval">
-            <solid android:color="@color/ent_background_gray" />
-            <stroke android:width="2dp" android:color="#FFFFFF" />
+            <solid android:color="@color/ent_background_blue" />
+            <stroke android:width="2dp" android:color="@color/ent_foreground_blue" />
             <padding android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp" />
         </shape>
     </item>

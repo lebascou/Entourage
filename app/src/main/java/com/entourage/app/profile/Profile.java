@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -30,22 +31,27 @@ import java.util.GregorianCalendar;
 public class Profile implements Serializable
 {
     public static final int DEFAULT_PICTURE_SIZE = 768;
+    public static final int DEFAULT_MIN_PICTURE_SIZE = 256;
     public static final int DEFAULT_MAX_PICTURE = 4;
     public static final String PREFS_USER_PROFILE = "preferences_user_profile";
     private static final String PREFS_USER_PROFILE_USER_ID = "user_id";
     private static final String PREFS_USER_PROFILE_USER_FIRST_NAME = "user_first_name";
+    private static final String PREFS_USER_PROFILE_USER_LAST_NAME = "user_last_name";
     private static final String PREFS_USER_PROFILE_USER_AGE = "user_age";
+    private static final String PREFS_USER_PROFILE_USER_EMAIL = "user_email";
+    private static final String PREFS_USER_PROFILE_USER_GENDER = "user_gender";
     private static final String PREFS_USER_PROFILE_USER_PICTURE = "user_picture";
+    private static final String PREFS_USER_PROFILE_USER_BIO = "user_bio";
 
     private Session mFbSession;
     private String mUserId;
     private String mEmail;
-    private String mGender;
     private String mFirstName;
     private String mLastName;
     private String mBirthDay;
-    private ArrayList<Bitmap> mProfilePicture;
-    private boolean mIsSilhouette;
+    private String mGender;
+    private String mBio;
+    private ArrayList<String> mProfilePicture;
     private String mProfileAlbumId;
 
     /**
@@ -54,7 +60,7 @@ public class Profile implements Serializable
      */
     public Profile(Session fbSession)
     {
-        this(fbSession, null, null, null);
+        this(fbSession, null, null, null, null, null, null, "");
     }
 
     /**
@@ -63,13 +69,18 @@ public class Profile implements Serializable
      * @param userId
      * @param firstName
      */
-    public Profile(Session fbSession, String userId, String firstName, String age)
+    public Profile(Session fbSession, String userId, String email, String firstName, String lastName,
+                   String birthday, String gender, String bio)
     {
         this.mFbSession = fbSession;
         this.mUserId = userId;
+        this.mEmail = email;
         this.mFirstName = firstName;
-        this.mBirthDay = age;
-        this.mProfilePicture = new ArrayList<Bitmap>();
+        this.mLastName = lastName;
+        this.mBirthDay = birthday;
+        this.mGender = gender;
+        this.mBio = bio;
+        this.mProfilePicture = new ArrayList<String>();
     }
 
     public void loadBasicInformations()
@@ -148,9 +159,11 @@ public class Profile implements Serializable
                             for (int i = 0; i < dataObj.length() && i < DEFAULT_MAX_PICTURE; i++)
                             {
                                 JSONObject curPhotoObj = dataObj.getJSONObject(i);
-                                appendBestFittedImage(curPhotoObj.getJSONArray("images"),
-                                                      curPhotoObj.getInt("width"),
-                                                      curPhotoObj.getInt("height"));
+                                String bestFitted = getBestFittedImage(curPhotoObj.getJSONArray("images"),
+                                        curPhotoObj.getInt("width"),
+                                        curPhotoObj.getInt("height"));
+                                if (bestFitted != null)
+                                    mProfilePicture.add(bestFitted);
                             }
                         } catch (JSONException e) {
                         } catch (MalformedURLException e) {
@@ -163,7 +176,7 @@ public class Profile implements Serializable
         ).executeAndWait();
     }
 
-    public void appendBestFittedImage(JSONArray curPhotoImages, int width, int height) throws JSONException, IOException
+    public static String getBestFittedImage(JSONArray curPhotoImages, int width, int height) throws JSONException, IOException
     {
         boolean ratioOnWidth = true;
         int closestImageAbsDiff = 0;
@@ -186,12 +199,9 @@ public class Profile implements Serializable
         }
 
         if (closestImageIdx >= 0) {
-            URL curImageUrl = new URL(curPhotoImages.getJSONObject(closestImageIdx).getString("source"));
-            Bitmap curBitmap = BitmapFactory.decodeStream(curImageUrl.openStream());
-            if (curBitmap != null) {
-                addToPictures(curBitmap);
-            }
+            return curPhotoImages.getJSONObject(closestImageIdx).getString("source");
         }
+        return null;
     }
 
     public void addToPictures(Bitmap bmp)
@@ -219,7 +229,7 @@ public class Profile implements Serializable
                     bmp.getWidth()
             );
         }
-        mProfilePicture.add(dstBmp);
+        //mProfilePicture.add(dstBmp);
     }
 
     public void loadChanges()
@@ -236,6 +246,18 @@ public class Profile implements Serializable
     public String getFirstName()
     {
         return mFirstName;
+    }
+
+    public String getBio()
+    {
+        return mBio;
+    }
+
+    public void setBio(String bio)
+    {
+        if (bio.length() > 500)
+            bio = bio.substring(0, 500);
+        this.mBio = bio;
     }
 
     public String getAge()
@@ -258,7 +280,23 @@ public class Profile implements Serializable
         return age;
     }
 
-    public Bitmap getProfilePicture(int index)
+    public void addPicture(String url)
+    {
+        this.mProfilePicture.add(url);
+    }
+
+    public void removePicture(int idx)
+    {
+        if (idx >= 0 && idx < mProfilePicture.size())
+            mProfilePicture.remove(idx);
+    }
+
+    public void swapProfilePicture(int firstIdx, int secondIdx)
+    {
+        Collections.swap(mProfilePicture, firstIdx, secondIdx);
+    }
+
+    public String getProfilePicture(int index)
     {
         if (index >= 0 && mProfilePicture.size() > index)
             return mProfilePicture.get(index);
@@ -273,10 +311,24 @@ public class Profile implements Serializable
     {
         if (settings.contains(PREFS_USER_PROFILE_USER_ID))
         {
-            return new Profile(fbSession,
-                    settings.getString(PREFS_USER_PROFILE_USER_ID, ""),
-                    settings.getString(PREFS_USER_PROFILE_USER_FIRST_NAME, ""),
-                    settings.getString(PREFS_USER_PROFILE_USER_AGE, ""));
+           Profile profile = new Profile(fbSession,
+                   settings.getString(PREFS_USER_PROFILE_USER_ID, ""),
+                   settings.getString(PREFS_USER_PROFILE_USER_EMAIL, ""),
+                   settings.getString(PREFS_USER_PROFILE_USER_FIRST_NAME, ""),
+                   settings.getString(PREFS_USER_PROFILE_USER_LAST_NAME, ""),
+                   settings.getString(PREFS_USER_PROFILE_USER_AGE, ""),
+                    settings.getString(PREFS_USER_PROFILE_USER_GENDER, ""),
+                    settings.getString(PREFS_USER_PROFILE_USER_BIO, ""));
+            for (int i = 0; i < DEFAULT_MAX_PICTURE; i++)
+            {
+                String imgKey = PREFS_USER_PROFILE_USER_PICTURE + String.valueOf(i);
+                if (settings.contains(imgKey)) {
+                    String url = settings.getString(imgKey, "");
+                    if (!url.isEmpty())
+                        profile.addPicture(url);
+                }
+            }
+            return profile;
         }
         else
             return null;
@@ -297,19 +349,18 @@ public class Profile implements Serializable
         return new_profile;
     }
 
-    public void loadFromMemory()
-    {
-
-    }
-
     public void saveLocal(SharedPreferences settings)
     {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PREFS_USER_PROFILE_USER_ID, mUserId);
+        editor.putString(PREFS_USER_PROFILE_USER_EMAIL, mEmail);
+        editor.putString(PREFS_USER_PROFILE_USER_GENDER, mGender);
         editor.putString(PREFS_USER_PROFILE_USER_FIRST_NAME, mFirstName);
+        editor.putString(PREFS_USER_PROFILE_USER_LAST_NAME, mLastName);
         editor.putString(PREFS_USER_PROFILE_USER_AGE, mBirthDay);
-        //for (int i = 0; i < mProfilePicture.size(); i++)
-        //    editor.putString(PREFS_USER_PROFILE_USER_PICTURE + String.valueOf(i), mProfilePicture.get(i));
+        editor.putString(PREFS_USER_PROFILE_USER_BIO, mBio);
+        for (int i = 0; i < Profile.DEFAULT_MAX_PICTURE; i++)
+            editor.putString(PREFS_USER_PROFILE_USER_PICTURE + String.valueOf(i), getProfilePicture(i));
         editor.commit();
     }
 }

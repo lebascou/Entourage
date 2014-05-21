@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -21,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -55,6 +58,7 @@ public class NavigationDrawerFragment extends Fragment
     private ListView mActionListView;
     private ListView mSettingsListView;
     private View mFragmentContainerView;
+    private ImageView mProfilePicture;
 
     private String mCurrentSelectedItem;
     private boolean mFromSavedInstanceState;
@@ -97,8 +101,7 @@ public class NavigationDrawerFragment extends Fragment
         mActionListView = (ListView) mDrawerContainer.findViewById(R.id.navigation_list);
         mSettingsListView = (ListView) mDrawerContainer.findViewById(R.id.settings_list);
 
-        ImageView profile_picture = (ImageView) mDrawerContainer.findViewById(R.id.profile_picture);
-        profile_picture.setImageBitmap(ImageUtils.getRoundedCornerBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_monkey_headphone)));
+        mProfilePicture = (ImageView) mDrawerContainer.findViewById(R.id.drawer_profile_picture);
         mActionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -297,4 +300,10 @@ public class NavigationDrawerFragment extends Fragment
          */
         void onNavigationDrawerItemSelected(String item_title);
     }
+
+    public void setProfilePicture(String url)
+    {
+        Picasso.with(getActivity()).load(url).transform(new CircleTransform()).into(mProfilePicture);
+    }
+
 }
