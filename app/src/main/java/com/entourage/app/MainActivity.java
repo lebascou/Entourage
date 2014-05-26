@@ -12,16 +12,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.entourage.app.auth.LoginActivity;
+import com.entourage.app.home.FragmentHome;
 import com.entourage.app.places.FragmentPlaces;
 import com.entourage.app.profile.FragmentProfile;
 import com.entourage.app.profile.Profile;
-import com.facebook.Session;
+import com.entourage.app.settings.FragmentSettings;
 
 import java.util.HashMap;
 
 public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
-    public static final String EXTRA_USER_PROFILE = "extra_user_profile";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -51,6 +50,11 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
         mLoadingTask = new MainActivityLoadingTask();
         mLoadingTask.execute();
+    }
+
+    public void setDrawerPicture(String url)
+    {
+        mNavigationDrawerFragment.setProfilePicture(url);
     }
 
     public void showProgress(boolean show)
@@ -119,23 +123,13 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         protected Boolean doInBackground(Void... params) {
             // Load user profile
             Bundle extras = getIntent().getExtras();
-            Session session = (Session) extras.get(LoginActivity.EXTRA_USER_SESSION);
-            mProfile = Profile.get(getSharedPreferences(Profile.PREFS_USER_PROFILE, 0), session);
-
-            // if profile doesnt exist (first user log in)
-            // create one (load from facebook api)
-            if (mProfile == null)
-            {
-                mProfile = Profile.initFromFbApi(getSharedPreferences(Profile.PREFS_USER_PROFILE, 0), session);
-            }
-
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(EXTRA_USER_PROFILE, mProfile);
+            mProfile = (Profile) extras.get(Profile.EXTRA_USER_PROFILE);
 
             // Setup the views
             mFragmentViews = new HashMap<String, Fragment>();
             FragmentProfile fragmentProfile = new FragmentProfile();
-            fragmentProfile.setArguments(bundle);
+            fragmentProfile.setArguments(extras);
+            mFragmentViews.put(getString(R.string.title_home), new FragmentHome());
             mFragmentViews.put(getString(R.string.title_profile), fragmentProfile);
             mFragmentViews.put(getString(R.string.title_places), new FragmentPlaces());
             mFragmentViews.put(getString(R.string.title_clothes), new FragmentClothes());
@@ -155,7 +149,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
             mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
                     (DrawerLayout) findViewById(R.id.drawer_layout));
             mNavigationDrawerFragment.setProfilePicture(mProfile.getProfilePicture(0));
-            onNavigationDrawerItemSelected(getString(R.string.title_profile));
+            onNavigationDrawerItemSelected(getString(R.string.title_places));
         }
 
         @Override

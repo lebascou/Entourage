@@ -36,6 +36,7 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
                 FilterResults filterResults = new FilterResults();
                 if (constraint != null) {
                     // Retrieve the autocomplete results.
+                    //resultList = PlacesApiUtils.autocomplete(constraint.toString());
                     resultList = PlacesApiUtils.autocomplete(constraint.toString());
 
                     // Assign the data to the FilterResults

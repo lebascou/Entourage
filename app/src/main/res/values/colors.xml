@@ -9,6 +9,7 @@
     <color name="ent_background_milk">#b4faf8d5</color>
     <color name="ent_background_gray">#ff909090</color>
     <color name="ent_background_gray_light">#ffC0C0C0</color>
+    <color name="ent_foreground_gray_light">#FFD0D0D0</color>
     <color name="ent_separator_line_color">#FFD0D0D0</color>
     <color name="ent_foreground_blue">#ff43c0ff</color>
     <color name="ent_background_blue">#6f43c0ff</color>

@@ -111,10 +111,11 @@ public class NavigationDrawerFragment extends Fragment
         mActionListView.setAdapter(new ActionAdapter(
                 getActionBar().getThemedContext(),
                 new String[]{
-                        getString(R.string.title_profile),
+                        getString(R.string.title_home),
                         getString(R.string.title_places),
-                        getString(R.string.title_clothes),
-                        getString(R.string.title_wanted),
+                        getString(R.string.title_profile)
+                        //getString(R.string.title_clothes),
+                        //getString(R.string.title_wanted),
                 }));
 
         mSettingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -147,7 +148,7 @@ public class NavigationDrawerFragment extends Fragment
         mDrawerLayout = drawerLayout;
 
         // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.END);
         // set up the drawer's list view with items and click listener
 
         ActionBar actionBar = getActionBar();

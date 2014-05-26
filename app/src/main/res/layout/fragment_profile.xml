@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:flatui="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -43,12 +44,14 @@
                 android:background="@drawable/action_button_border"
                 android:padding="6dp" />
 
-            <TextView
+            <com.cengalabs.flatui.views.FlatTextView
+                flatui:theme="@array/deep"
+                flatui:fontFamily="roboto"
+                flatui:fontWeight="white"
+                flatui:fontExtension="ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:textColor="@color/ent_foreground_white"
-                android:text="Large Text"
                 android:id="@+id/profile_FirstNameAge"
                 android:textSize="18dp" />
             <View
@@ -116,14 +119,17 @@
         android:layout_width="80dp"
         android:layout_gravity="center"/>
 
-    <TextView
+    <com.cengalabs.flatui.views.FlatTextView
+        flatui:theme="@array/deep"
+        flatui:fontFamily="roboto"
+        flatui:fontWeight="white"
+        flatui:fontExtension="ttf"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/profile_bio_title"
         android:layout_marginBottom="4dp"
         android:id="@+id/textView"
-        android:textColor="@color/ent_foreground_white"
         android:textSize="18dp" />
 
     <EditText

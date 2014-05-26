@@ -3,8 +3,10 @@ package com.entourage.app.profile;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.entourage.app.auth.LoginActivity;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Response;
@@ -18,6 +20,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ public class Profile implements Serializable
     public static final int DEFAULT_PICTURE_SIZE = 768;
     public static final int DEFAULT_MIN_PICTURE_SIZE = 256;
     public static final int DEFAULT_MAX_PICTURE = 4;
+    public static final String EXTRA_USER_PROFILE = "extra_user_profile";
     public static final String PREFS_USER_PROFILE = "preferences_user_profile";
     private static final String PREFS_USER_PROFILE_USER_ID = "user_id";
     private static final String PREFS_USER_PROFILE_USER_FIRST_NAME = "user_first_name";
@@ -43,7 +47,6 @@ public class Profile implements Serializable
     private static final String PREFS_USER_PROFILE_USER_PICTURE = "user_picture";
     private static final String PREFS_USER_PROFILE_USER_BIO = "user_bio";
 
-    private Session mFbSession;
     private String mUserId;
     private String mEmail;
     private String mFirstName;
@@ -56,23 +59,20 @@ public class Profile implements Serializable
 
     /**
      * Constructor from a facebook session
-     * @param fbSession
      */
-    public Profile(Session fbSession)
+    public Profile()
     {
-        this(fbSession, null, null, null, null, null, null, "");
+        this(null, null, null, null, null, null, "");
     }
 
     /**
      * Constructor for saved instances
-     * @param fbSession
      * @param userId
      * @param firstName
      */
-    public Profile(Session fbSession, String userId, String email, String firstName, String lastName,
-                   String birthday, String gender, String bio)
+    public Profile(String userId, String email,
+                   String firstName, String lastName, String birthday, String gender, String bio)
     {
-        this.mFbSession = fbSession;
         this.mUserId = userId;
         this.mEmail = email;
         this.mFirstName = firstName;
@@ -85,7 +85,7 @@ public class Profile implements Serializable
 
     public void loadBasicInformations()
     {
-        Request.newMeRequest(mFbSession,
+        Request.newMeRequest(Session.getActiveSession(),
                 new Request.GraphUserCallback() {
                     @Override
                     public void onCompleted(GraphUser user, Response response) {
@@ -111,7 +111,7 @@ public class Profile implements Serializable
         bundle.putString("fields", "type,id");
 
         new Request(
-                mFbSession,
+                Session.getActiveSession(),
                 "/me/albums",
                 bundle,
                 HttpMethod.GET,
@@ -130,7 +130,7 @@ public class Profile implements Serializable
                                     break;
                                 }
                             }
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                         }
                     }
                 }
@@ -146,7 +146,7 @@ public class Profile implements Serializable
         bundle.putString("fields", "images,width,height");
 
         new Request(
-                mFbSession,
+                Session.getActiveSession(),
                 "/" + profilePictureAlbumId + "/photos",
                 bundle,
                 HttpMethod.GET,
@@ -165,11 +165,7 @@ public class Profile implements Serializable
                                 if (bestFitted != null)
                                     mProfilePicture.add(bestFitted);
                             }
-                        } catch (JSONException e) {
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
                         }
                     }
                 }
@@ -232,10 +228,13 @@ public class Profile implements Serializable
         //mProfilePicture.add(dstBmp);
     }
 
-    public void loadChanges()
+    public void loadChanges(LoginActivity.ProfileLoader reporter)
     {
+        if (reporter != null) reporter.updateProgress(30);
         loadBasicInformations();
+        if (reporter != null) reporter.updateProgress(60);
         loadProfilePictures();
+        if (reporter != null) reporter.updateProgress(90);
     }
 
     public String getUserId()
@@ -307,18 +306,18 @@ public class Profile implements Serializable
      * Get the profile saved in shared preferences storage
      * @return Profile or null if none
      */
-    public static Profile get(SharedPreferences settings, Session fbSession)
+    public static Profile get(SharedPreferences settings)
     {
         if (settings.contains(PREFS_USER_PROFILE_USER_ID))
         {
-           Profile profile = new Profile(fbSession,
-                   settings.getString(PREFS_USER_PROFILE_USER_ID, ""),
-                   settings.getString(PREFS_USER_PROFILE_USER_EMAIL, ""),
-                   settings.getString(PREFS_USER_PROFILE_USER_FIRST_NAME, ""),
-                   settings.getString(PREFS_USER_PROFILE_USER_LAST_NAME, ""),
-                   settings.getString(PREFS_USER_PROFILE_USER_AGE, ""),
-                    settings.getString(PREFS_USER_PROFILE_USER_GENDER, ""),
-                    settings.getString(PREFS_USER_PROFILE_USER_BIO, ""));
+            Profile profile = new Profile(
+                           settings.getString(PREFS_USER_PROFILE_USER_ID, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_EMAIL, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_FIRST_NAME, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_LAST_NAME, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_AGE, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_GENDER, ""),
+                           settings.getString(PREFS_USER_PROFILE_USER_BIO, ""));
             for (int i = 0; i < DEFAULT_MAX_PICTURE; i++)
             {
                 String imgKey = PREFS_USER_PROFILE_USER_PICTURE + String.valueOf(i);
@@ -334,19 +333,31 @@ public class Profile implements Serializable
             return null;
     }
 
+    public static Profile initFromFbApi(SharedPreferences settings, LoginActivity.ProfileLoader reporter)
+    {
+        Profile new_profile = new Profile();
+        new_profile.loadChanges(reporter);
+        new_profile.saveLocal(settings);
+        return new_profile;
+    }
+
+    public static void localDelete(SharedPreferences settings)
+    {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove(PREFS_USER_PROFILE_USER_ID);
+        editor.commit();
+        //TODO maybe remove the rest (not necessary for now)
+    }
+
     /**
      * First time initialization for a new user
      *
      * @param settings
-     * @param fbSession
      * @return The loaded Profile (TODO: handle network problems)
      */
-    public static Profile initFromFbApi(SharedPreferences settings, Session fbSession)
+    public static Profile initFromFbApi(SharedPreferences settings)
     {
-        Profile new_profile = new Profile(fbSession);
-        new_profile.loadChanges();
-        new_profile.saveLocal(settings);
-        return new_profile;
+        return initFromFbApi(settings, null);
     }
 
     public void saveLocal(SharedPreferences settings)

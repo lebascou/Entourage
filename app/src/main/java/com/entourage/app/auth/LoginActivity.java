@@ -4,18 +4,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.entourage.app.MainActivity;
 import com.entourage.app.R;
-import com.facebook.LoggingBehavior;
+import com.entourage.app.profile.Profile;
 import com.facebook.Session;
 import com.facebook.SessionState;
-import com.facebook.Settings;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.widget.LoginButton;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -23,11 +23,11 @@ import java.util.Arrays;
  */
 public class LoginActivity extends Activity
 {
-    public static final String EXTRA_USER_SESSION = "extra_user_session_facebook";
-
-    // Fb Client
-    private Session.StatusCallback fbStatusCallback;
-    private UiLifecycleHelper fbUiHelper;
+    private Button mFbAuthButton;
+    private FbSessionStatusCallback mFbStatusCallback;
+    private ProfileLoader mProfileLoader = null;
+    private Profile mProfile;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -35,13 +35,65 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Setup facebook login
-        fbStatusCallback = new FbSessionStatusCallback();
-        fbUiHelper = new UiLifecycleHelper(this, fbStatusCallback);
-        fbUiHelper.onCreate(savedInstanceState);
-        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-        LoginButton fbAuthButton = (LoginButton) findViewById(R.id.fbAuthButton);
-        fbAuthButton.setReadPermissions(Arrays.asList("public_profile", "email", "user_birthday", "user_friends", "user_interests", "user_photos"));
+        mProfile = Profile.get(getSharedPreferences(Profile.PREFS_USER_PROFILE, 0));
+        if (mProfile != null) {
+            Session.openActiveSessionFromCache(getApplicationContext());
+            startMainActivity();
+        }
+
+        mFbStatusCallback = new FbSessionStatusCallback();
+        mFbAuthButton = (Button) findViewById(R.id.fb_auth_button);
+        mFbAuthButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAuthButtonClick();
+            }
+        });
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+    }
+
+    protected void onAuthButtonClick()
+    {
+        mFbAuthButton.setEnabled(false);
+
+        Session session = Session.getActiveSession();
+        if (session == null) {
+            session = new Session.Builder(this).build();
+            session.addCallback(mFbStatusCallback);
+            Session.setActiveSession(session);
+        }
+        if (!session.isOpened() && !session.isClosed()) {
+            List<String> permissions = Arrays.asList("public_profile", "user_birthday",
+                                                     "user_friends", "user_interests", "user_photos");
+            session.openForRead(new Session.OpenRequest(this)
+                    .setPermissions(permissions));
+        }
+        else {
+            Session.openActiveSession(this, true, mFbStatusCallback);
+        }
+    }
+
+    public void startMainActivity()
+    {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(Profile.EXTRA_USER_PROFILE, mProfile);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loadProfile()
+    {
+        mProfileLoader = new ProfileLoader();
+        mProfileLoader.execute();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK && requestCode == Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE)
+        {
+            Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        }
     }
 
     private class FbSessionStatusCallback implements Session.StatusCallback
@@ -49,58 +101,41 @@ public class LoginActivity extends Activity
         @Override
         public void call(Session session, SessionState state, Exception exception) {
             if (state.isOpened()) {
-                processFacebookLogin(session);
+                loadProfile();
             }
         }
     }
 
-    public void processFacebookLogin(Session session)
+    public class ProfileLoader extends AsyncTask<Void, Integer, Void>
     {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_USER_SESSION, session);
-        startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Session session = Session.getActiveSession();
-        if (session != null && session.isOpened()) {
-            processFacebookLogin(session);
+        @Override
+        protected Void doInBackground(Void... params) {
+            mProfile = Profile.initFromFbApi(getSharedPreferences(Profile.PREFS_USER_PROFILE, 0), this);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Profile.EXTRA_USER_PROFILE, mProfile);
+            return null;
         }
-        else {
-            fbUiHelper.onResume();
+
+        @Override
+        protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mProgressBar.setProgress(0);
+            super.onPreExecute();
         }
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            mProgressBar.setProgress(values[0]);
+            super.onProgressUpdate(values);
+        }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        fbUiHelper.onPause();
-    }
+        @Override
+        protected void onPostExecute(Void result) {
+            startMainActivity();
+        }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        fbUiHelper.onDestroy();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        fbUiHelper.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        fbUiHelper.onSaveInstanceState(outState);
+        public void updateProgress(int progress) {
+            publishProgress(progress);
+        }
     }
 }

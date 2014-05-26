@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,6 +12,7 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.cengalabs.flatui.views.FlatTextView;
 import com.entourage.app.R;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
@@ -25,7 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +39,7 @@ public class PickPictureActivity extends Activity
     private AlbumClickListener mAlbumClickListener;
     private PhotoClickListener mPhotoClickListener;
     private PhotoAdapter mPhotoAdapter;
+    private FlatTextView mErrorTextView;
     String mCurUrl;
 
     @Override
@@ -47,11 +47,12 @@ public class PickPictureActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick_picture);
+        overridePendingTransition(R.anim.activity_enter_from_left, R.anim.activity_leave_from_left);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setLogo(R.drawable.ic_ab_back_holo_dark_am);
         getActionBar().setTitle(getString(R.string.title_albums));
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
+        mErrorTextView = (FlatTextView) findViewById(R.id.error_text_view);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mAlbumList = (ListView) findViewById(R.id.album_list);
         mPhotoList = (GridView) findViewById(R.id.photo_list);
@@ -72,9 +73,17 @@ public class PickPictureActivity extends Activity
     }
 
     @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        this.overridePendingTransition(R.anim.activity_enter_from_right, R.anim.activity_leave_from_right);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mAlbumList.getVisibility() == View.VISIBLE) {
             finish();
+            this.overridePendingTransition(R.anim.activity_enter_from_right, R.anim.activity_leave_from_right);
         }
         else {
             showAlbums();
@@ -103,8 +112,12 @@ public class PickPictureActivity extends Activity
     {
         showProgress(false);
         mAlbumAdapter.clear();
-        if (mAlbums != null) {
+        if (mAlbums != null && !mAlbums.isEmpty()) {
+            mErrorTextView.setVisibility(View.GONE);
             mAlbumAdapter.addAll(mAlbums);
+        }
+        else {
+            mErrorTextView.setVisibility(View.VISIBLE);
         }
         mAlbumAdapter.notifyDataSetChanged();
     }
@@ -187,7 +200,7 @@ public class PickPictureActivity extends Activity
                                 };
                                 albums.add(album);
                             }
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                         }
                     }
                 }
@@ -232,7 +245,7 @@ public class PickPictureActivity extends Activity
                                     e.printStackTrace();
                                 }
                             }
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                         }
                     }
                 }

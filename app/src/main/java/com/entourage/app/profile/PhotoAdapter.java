@@ -39,6 +39,7 @@ public class PhotoAdapter extends ArrayAdapter<String[]>
 
         Picasso.with(getContext())
                 .load(photo[1])
+                .placeholder(R.color.ent_background_gray_light)
                 .resize(Profile.DEFAULT_PICTURE_SIZE, Profile.DEFAULT_PICTURE_SIZE)
                 .centerCrop()
                 .into(view);

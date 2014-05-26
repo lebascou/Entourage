@@ -52,7 +52,7 @@ public class FragmentProfile extends Fragment
         mRootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         Bundle bundle = this.getArguments();
-        mProfile = (Profile) bundle.getSerializable(MainActivity.EXTRA_USER_PROFILE);
+        mProfile = (Profile) bundle.getSerializable(Profile.EXTRA_USER_PROFILE);
         mBioTextView = (EditText) mRootView.findViewById(R.id.editText);
         mBioTextView.setText(mProfile.getBio());
         mBioTextView.addTextChangedListener(new BioEventListener());
@@ -130,6 +130,8 @@ public class FragmentProfile extends Fragment
                .transform(mCircleTransformer)
                .placeholder(R.drawable.picture_loading_animation)
                .into(imgView);
+            if (imgView == mImgViews.get(0))
+                ((MainActivity) getActivity()).setDrawerPicture(url);
         }
     }
 

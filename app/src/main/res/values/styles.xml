@@ -5,7 +5,8 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:autoCompleteTextViewStyle">@style/MyEditText</item>
-        <item name="android:homeAsUpIndicator">@null</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_ab_back_holo_dark_am</item>
+        <item name="android:actionBarWidgetTheme">@style/MyActionBarWidgetTheme</item>
     </style>
 
     <!-- ActionBar styles -->
@@ -13,6 +14,12 @@
         <item name="android:textColor">@color/ent_foreground_white</item>
         <item name="android:background">@color/ent_background_dark</item>
         <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+    </style>
+
+    <!-- Search view style-->
+    <style name="MyActionBarWidgetTheme" parent="@android:style/Theme.Holo">
+        <item name="android:textColor">@color/ent_foreground_white</item>
+        <item name="android:textColorHint">@color/ent_foreground_gray_light</item>
     </style>
 
     <style name="MyActionBarTitleText">
@@ -24,28 +31,5 @@
         <item name="android:background">@drawable/element_border_dark</item>
         <item name="android:textCursorDrawable">@null</item>
     </style>
-
-    <style name="LoginFormContainer">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">16dp</item>
-    </style>
-
-    <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">@style/ButtonBar</item>
-        <item name="metaButtonBarButtonStyle">@style/ButtonBarButton</item>
-    </style>
-
-    <style name="ButtonBar">
-        <item name="android:paddingLeft">2dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingRight">2dp</item>
-        <item name="android:paddingBottom">0dp</item>
-        <item name="android:background">@android:drawable/bottom_bar</item>
-    </style>
-
-    <style name="ButtonBarButton" />
 
 </resources>
