@@ -25,6 +25,12 @@ public class AlbumAdapter extends ArrayAdapter<String[]>
 {
     private CircleTransform mTransformationCircle;
 
+    /**
+     * Constructor
+     *
+     * @param context
+     * @param albums Array of albums (format: {{id, name, count, coverPictureUrl}, ...})
+     */
     public AlbumAdapter(Context context, List<String[]> albums)
     {
         super(context, R.layout.albums_list_item, albums);
@@ -49,7 +55,7 @@ public class AlbumAdapter extends ArrayAdapter<String[]>
         Picasso.with(getContext())
                 .load(curAlbum[3])
                 .placeholder(R.drawable.ic_action_picture)
-                .resize(130, 130)
+                .resize(130, 130) // TODO: this is ugly, to investigate...
                 .centerCrop()
                 .transform(mTransformationCircle)
                 .into(albumCoverPhoto);

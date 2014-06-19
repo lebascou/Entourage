@@ -252,7 +252,7 @@ public class Profile implements Serializable
         return mBio;
     }
 
-    public void setBio(String bio)
+    public void setTagLine(String bio)
     {
         if (bio.length() > 500)
             bio = bio.substring(0, 500);

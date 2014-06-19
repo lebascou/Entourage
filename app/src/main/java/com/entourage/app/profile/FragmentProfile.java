@@ -2,14 +2,10 @@ package com.entourage.app.profile;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,40 +25,72 @@ import java.util.ArrayList;
 
 /**
  * Created by Fabrice on 5/10/14.
+ * <p/>
+ * Profile fragment, show user profile and public informations
+ * Allow user to edit tag line and profile pictures
  */
-public class FragmentProfile extends Fragment
-{
-    public static final int RESULT_PICTURE_SELECTED = 1;
+public class FragmentProfile extends Fragment {
+    /**
+     * Profile model instance
+     * Initialized from the bundle
+     */
     private Profile mProfile;
+    /**
+     * TextView - user first name (and age if available)
+     */
     private TextView mTextFirstName;
+    /**
+     * Root view of the fragment
+     */
     private View mRootView;
-    private EditText mBioTextView;
+    /**
+     * User profile public tagline (editable)
+     */
+    private EditText mTagLineTextView;
+    /**
+     * Circle transformation for Picasso image loader
+     * Saved in class for reuse
+     */
     private CircleTransform mCircleTransformer;
+    /**
+     * OnClick listener for the profile images
+     * Allow the user to swap images and reorder them
+     */
     private ProfileImageClickListener mImageClickListener;
+    /**
+     * ImageView containing the user profile pictures
+     * mImgView[i] <=> Profile.profilePicture[i]
+     */
     private ArrayList<ImageView> mImgViews;
+    /**
+     * Keep track of the last image selected for a potential swap action
+     */
     private ImageView mLastImgSelected = null;
+    /**
+     * Picasso instance to load images async
+     */
     private Picasso mPicasso;
+    /**
+     * Remove profile picture action (shows only when one picture is selected)
+     */
     private MenuItem mActionDeletePicture = null;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Allow the fragment to create a menu with the onCreateOptionsMenu method
         setHasOptionsMenu(true);
 
-        mRootView = inflater.inflate(R.layout.fragment_profile, container, false);
-
+        // Load the profile from bundle
         Bundle bundle = this.getArguments();
         mProfile = (Profile) bundle.getSerializable(Profile.EXTRA_USER_PROFILE);
-        mBioTextView = (EditText) mRootView.findViewById(R.id.editText);
-        mBioTextView.setText(mProfile.getBio());
-        mBioTextView.addTextChangedListener(new BioEventListener());
+
+        // Get the views
+        mRootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        mTagLineTextView = (EditText) mRootView.findViewById(R.id.editText);
+        mTagLineTextView.setText(mProfile.getBio());
+        mTagLineTextView.addTextChangedListener(new TagLineEventListener());
         mTextFirstName = (TextView) mRootView.findViewById(R.id.profile_FirstNameAge);
         mTextFirstName.setText(mProfile.getFirstName() + ", " + mProfile.getAge() + " " + getString(R.string.age_suffix));
-
-        mPicasso = Picasso.with(getActivity());
-        mPicasso.setDebugging(false);
-        mImageClickListener = new ProfileImageClickListener();
-        mCircleTransformer = new CircleTransform();
 
         mImgViews = new ArrayList<ImageView>();
         mImgViews.add((ImageView) mRootView.findViewById(R.id.profile_mainPicture));
@@ -71,18 +99,21 @@ public class FragmentProfile extends Fragment
         mImgViews.add((ImageView) mRootView.findViewById(R.id.profile_picture3));
         mImgViews.add((ImageView) mRootView.findViewById(R.id.profile_picture4));
 
-        for (int i = 0; i < mImgViews.size(); i++)
-        {
+        // Init the image loader and load profile pictures
+        mPicasso = Picasso.with(getActivity());
+        mImageClickListener = new ProfileImageClickListener();
+        mCircleTransformer = new CircleTransform();
+        for (int i = 0; i < mImgViews.size(); i++) {
             setProfileImageUrlToView(mImgViews.get(i), mProfile.getProfilePicture(i), Profile.DEFAULT_PICTURE_SIZE);
             mImgViews.get(i).setOnClickListener(mImageClickListener);
+            //TODO: Future update -> reorder images by dragging them at the desired position
             //mImgViews.get(i).setOnLongClickListener(mImageClickListener);
         }
         return mRootView;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-    {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.profile, menu);
         mActionDeletePicture = menu.findItem(R.id.action_delete_picture);
         mActionDeletePicture.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -96,15 +127,20 @@ public class FragmentProfile extends Fragment
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Result from the Pick picture from facebook activity
+     * If a picture is picked, add it to the first available picture slot
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == requestCode) {
             String url = data.getStringExtra("url");
-            for (int i = 0; i < mImgViews.size(); i++)
-            {
-                if (mProfile.getProfilePicture(i) == null)
-                {
+            for (int i = 0; i < mImgViews.size(); i++) {
+                if (mProfile.getProfilePicture(i) == null) {
                     mProfile.addPicture(url);
                     mImgViews.get(i).setSelected(false);
                     setProfileImageUrlToView(mImgViews.get(i), url, Profile.DEFAULT_PICTURE_SIZE);
@@ -115,57 +151,70 @@ public class FragmentProfile extends Fragment
         }
     }
 
-    public void setProfileImageUrlToView(ImageView imgView, String url, int maxSize)
-    {
-        imgView.setSelected(false);
-        if (url == null || url.isEmpty())
-        {
-            imgView.setImageResource(R.drawable.ic_add);
-        }
-        else
-        {
-            mPicasso.load(url)
-               .resize(maxSize, maxSize)
-               .centerCrop()
-               .transform(mCircleTransformer)
-               .placeholder(R.drawable.picture_loading_animation)
-               .into(imgView);
-            if (imgView == mImgViews.get(0))
-                ((MainActivity) getActivity()).setDrawerPicture(url);
-        }
-    }
-
-    public void removeSelectedProfilePicture()
-    {
+    /**
+     * Remove the selected profile picture from the user profile
+     */
+    public void removeSelectedProfilePicture() {
         showDeletePictureAction(false);
-        if (mLastImgSelected != null)
-        {
+        if (mLastImgSelected != null) {
             int index = mImgViews.indexOf(mLastImgSelected);
             mProfile.removePicture(index);
             mProfile.saveLocal(getActivity().getSharedPreferences(Profile.PREFS_USER_PROFILE, 0));
-            resortProfilePictures();
+            sortProfilePictures();
         }
     }
 
-    public void resortProfilePictures()
-    {
+    /**
+     * Bind a picture URL to an ImageView using Picasso for asyn loading and caching
+     * The picture is currently cropped in its center and circled
+     *
+     * @param imgView The ImageView container
+     * @param url     The picture URL
+     * @param minSize Minimum size to resize the picture for the picasso centerCrop action
+     */
+    public void setProfileImageUrlToView(ImageView imgView, String url, int minSize) {
+        imgView.setSelected(false);
+        if (url == null || url.isEmpty()) {
+            imgView.setImageResource(R.drawable.ic_add);
+        } else {
+            mPicasso.load(url)
+                    .resize(minSize, minSize)
+                    .centerCrop()
+                    .transform(mCircleTransformer)
+                    .placeholder(R.drawable.picture_loading_animation)
+                    .into(imgView);
+            if (imgView == mImgViews.get(0)) {
+                // Main picture changed, it also changes the picture in the main nav drawer
+                ((MainActivity) getActivity()).setDrawerPicture(url);
+            }
+        }
+    }
+
+    /**
+     * Move all profile picture to the left (avoid blank in the middle of the picture list)
+     */
+    public void sortProfilePictures() {
         mLastImgSelected = null;
         for (int i = 1; i < mImgViews.size(); i++) {
             setProfileImageUrlToView(mImgViews.get(i), mProfile.getProfilePicture(i), Profile.DEFAULT_PICTURE_SIZE);
         }
     }
 
-
-    public void swapProfilePictures(ImageView curSelected, int curIdx)
-    {
+    /**
+     * Swap two profile pictures
+     * This method can be called even when only one picture is selected so a check is required
+     * on the lastSelected and currentSelected
+     *
+     * @param curSelected Current selected picture
+     * @param curIdx      Current selected picture index
+     */
+    public void swapProfilePictures(ImageView curSelected, int curIdx) {
         curSelected.setSelected(!curSelected.isSelected());
         if (mLastImgSelected == null) {
-            if (mImgViews.indexOf(curSelected) > 0) // impossible to delete main picture
+            if (mImgViews.indexOf(curSelected) > 0) // hide the main picture delete action
                 showDeletePictureAction(true);
             mLastImgSelected = curSelected;
-        }
-        else
-        {
+        } else {
             showDeletePictureAction(false);
             int lastIdx = mImgViews.indexOf(mLastImgSelected);
 
@@ -181,19 +230,20 @@ public class FragmentProfile extends Fragment
         }
     }
 
-    public void showDeletePictureAction(boolean visible)
-    {
+    /**
+     * Set the delete picture action (actionBar) visibility
+     *
+     * @param visible
+     */
+    public void showDeletePictureAction(boolean visible) {
         mActionDeletePicture.setVisible(visible);
     }
 
-    @Override
-    public void onAttach(Activity activity)
-    {
-        super.onAttach(activity);
-    }
-
-    private class BioEventListener implements TextWatcher
-    {
+    /**
+     * Listen for change events on the Tag line
+     * TODO: Should do a more clever save (instead of saving every time the text is changed)
+     */
+    private class TagLineEventListener implements TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
@@ -204,27 +254,26 @@ public class FragmentProfile extends Fragment
 
         @Override
         public void afterTextChanged(Editable s) {
-            mProfile.setBio(s.toString());
+            mProfile.setTagLine(s.toString());
             mProfile.saveLocal(getActivity().getSharedPreferences(Profile.PREFS_USER_PROFILE, 0));
         }
     }
 
-    private class ProfileImageClickListener implements View.OnClickListener
-    {
+    /**
+     * Listen for click on the profile picture views
+     * Call the swap or show the delete action if necessary
+     */
+    private class ProfileImageClickListener implements View.OnClickListener {
         @Override
-        public void onClick(View v)
-        {
+        public void onClick(View v) {
             ImageView curSelected = (ImageView) v;
             int curIdx = mImgViews.indexOf(curSelected);
 
-            if (mProfile.getProfilePicture(curIdx) == null)
-            {
+            if (mProfile.getProfilePicture(curIdx) == null) {
                 showDeletePictureAction(false);
                 Intent intent = new Intent(getActivity(), PickPictureActivity.class);
-                startActivityForResult(intent, RESULT_PICTURE_SELECTED);
-            }
-            else
-            {
+                startActivityForResult(intent, Activity.RESULT_OK);
+            } else {
                 swapProfilePictures(curSelected, curIdx);
             }
         }

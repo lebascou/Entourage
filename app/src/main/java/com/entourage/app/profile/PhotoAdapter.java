@@ -1,7 +1,6 @@
 package com.entourage.app.profile;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -17,17 +16,28 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
 /**
  * Created by Fabrice on 5/12/14.
  */
-public class PhotoAdapter extends ArrayAdapter<String[]>
-{
+public class PhotoAdapter extends ArrayAdapter<String[]> {
 
-    public PhotoAdapter(Context context, List<String[]> photos)
-    {
-        super(context, R.layout.photos_list_item, photos); // photos_list_item not used
+    /**
+     * Constructor
+     *
+     * @param context
+     * @param photos Array of photo (format: {facebookId, url}}
+     */
+    public PhotoAdapter(Context context, List<String[]> photos) {
+        super(context, R.layout.photos_list_item, photos);
     }
 
+    /**
+     * Create an squared ImageView for the picture grid display
+     *
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
-    public View getView(int position, View convertView, ViewGroup parent)
-    {
+    public View getView(int position, View convertView, ViewGroup parent) {
         ImageView view = (ImageView) convertView;
         if (view == null) {
             view = new ImageView(getContext());

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:flatui="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:layout_marginBottom="8dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:gravity="center"
         android:layout_gravity="center_vertical"
-        android:background="@color/ent_background_dark">
+        android:background="@color/ent_background_white">
 
         <ImageView
             android:layout_width="64dp"
@@ -26,12 +26,12 @@
             android:orientation="vertical"
             android:paddingLeft="6dp">
 
-            <TextView
+            <com.cengalabs.flatui.views.FlatTextView
                 android:id="@+id/place_name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
-                android:textColor="@color/ent_foreground_white"
+                android:textColor="@color/ent_foreground_gray"
                 android:text="Unknown"
                 android:gravity="left" />
 
@@ -45,12 +45,36 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <com.cengalabs.flatui.views.FlatTextView
                         android:id="@+id/place_distance"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:textSize="8dp"
-                        android:textColor="@color/ent_foreground_white"
+                        android:textColor="@color/ent_foreground_gray"
+                        android:text="@string/place_default_distance"
+                        android:gravity="left"/>
+                    <com.cengalabs.flatui.views.FlatTextView
+                        android:id="@+id/place_info_1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="8dp"
+                        android:textColor="@color/ent_foreground_gray"
+                        android:text="@string/place_default_distance"
+                        android:gravity="left"/>
+                    <com.cengalabs.flatui.views.FlatTextView
+                        android:id="@+id/place_info_2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="8dp"
+                        android:textColor="@color/ent_foreground_gray"
+                        android:text="@string/place_default_distance"
+                        android:gravity="left"/>
+                    <com.cengalabs.flatui.views.FlatTextView
+                        android:id="@+id/place_info_3"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="8dp"
+                        android:textColor="@color/ent_foreground_gray"
                         android:text="@string/place_default_distance"
                         android:gravity="left"/>
                 </LinearLayout>
@@ -61,11 +85,11 @@
                     android:orientation="horizontal"
                     android:gravity="end">
 
-                    <TextView
+                    <com.cengalabs.flatui.views.FlatTextView
                         android:id="@+id/place_population_female"
                         android:layout_width="wrap_content"
                         android:layout_height="fill_parent"
-                        android:textColor="@color/ent_foreground_white"
+                        android:textColor="@color/ent_foreground_gray"
                         android:textSize="12dp"
                         android:gravity="bottom"
                         android:text="1"/>
@@ -75,11 +99,11 @@
                         android:layout_gravity="bottom"
                         android:src="@drawable/ic_female_white"/>
 
-                    <TextView
+                    <com.cengalabs.flatui.views.FlatTextView
                         android:id="@+id/place_population_male"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/ent_foreground_white"
+                        android:textColor="@color/ent_foreground_gray"
                         android:textSize="12dp"
                         android:gravity="bottom"
                         android:text="1"/>
@@ -98,6 +122,6 @@
     <View
         android:layout_width="fill_parent"
         android:layout_height="10px"
-        android:background="@drawable/drop_shadow" >
+        android:background="@drawable/drop_shadow_gray" >
     </View>
 </LinearLayout>

@@ -45,7 +45,7 @@
                 android:padding="6dp" />
 
             <com.cengalabs.flatui.views.FlatTextView
-                flatui:theme="@array/deep"
+                flatui:theme="@array/snow"
                 flatui:fontFamily="roboto"
                 flatui:fontWeight="white"
                 flatui:fontExtension="ttf"
@@ -120,7 +120,7 @@
         android:layout_gravity="center"/>
 
     <com.cengalabs.flatui.views.FlatTextView
-        flatui:theme="@array/deep"
+        flatui:theme="@array/snow"
         flatui:fontFamily="roboto"
         flatui:fontWeight="white"
         flatui:fontExtension="ttf"

@@ -28,8 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/placesList"
-        android:dividerHeight="0dp"
-        android:divider="@null"
+        android:dividerHeight="8dp"
+        android:divider="@android:color/transparent"
         android:fastScrollEnabled="false"
-        android:scrollbars="none"></ListView>
+        android:scrollbars="none"
+        android:background="@color/ent_background_white_broken">
+    </ListView>
 </LinearLayout>

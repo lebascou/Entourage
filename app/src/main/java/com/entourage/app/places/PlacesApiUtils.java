@@ -26,8 +26,8 @@ public class PlacesApiUtils
     private static final String OUT_JSON = "/json";
     private static final String API_KEY = "AIzaSyCW5wdfkRWvvtSBzxAwQp198dbx0z44tK0";
 
-    public static ArrayList<String> search(String input) {
-        ArrayList<String> resultList = null;
+    public static ArrayList<Place> search(String input) {
+        ArrayList<Place> resultList = null;
 
         HttpURLConnection conn = null;
         StringBuilder jsonResults = new StringBuilder();
@@ -64,12 +64,14 @@ public class PlacesApiUtils
         try {
             // Create a JSON object hierarchy from the results
             JSONObject jsonObj = new JSONObject(jsonResults.toString());
-            JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
+            JSONArray resultsArray = jsonObj.getJSONArray("results");
 
             // Extract the Place descriptions from the results
-            resultList = new ArrayList<String>(predsJsonArray.length());
-            for (int i = 0; i < predsJsonArray.length(); i++) {
-                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
+            resultList = new ArrayList<Place>(resultsArray.length());
+            for (int i = 0; i < resultsArray.length(); i++) {
+                Place curPlace = Place.fromPlacesApiJson(resultsArray.getJSONObject(i));
+                if (curPlace != null)
+                    resultList.add(curPlace);
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Cannot process JSON results", e);

@@ -30,4 +30,5 @@
     <string name="dialog_logout_message">Are you sure you want to logout from Entourage ?</string>
     <string name="action_search">Search place</string>
     <string name="action_delete">Delete</string>
+    <string name="places_list_empty">No places found</string>
 </resources>

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.entourage.app.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -30,10 +31,14 @@ public class PlacesAdapter extends ArrayAdapter<Place>
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.places_list_item, parent, false);
         }
         ImageView viewPicture = (ImageView) convertView.findViewById(R.id.place_picture);
-        if (curPlace.getPicturePath() == null)
+        if (curPlace.getPictureUrl() == null)
             viewPicture.setImageResource(R.drawable.ic_building);
         else
-            viewPicture.setImageBitmap(BitmapFactory.decodeFile(curPlace.getPicturePath()));
+            Picasso.with(getContext()).load(curPlace.getPictureUrl())
+                    .placeholder(R.drawable.ic_building)
+                    .resize(128, 128)
+                    .centerCrop()
+                    .into(viewPicture);
 
         TextView viewName = (TextView) convertView.findViewById(R.id.place_name);
         viewName.setText(curPlace.getName());
@@ -43,6 +48,14 @@ public class PlacesAdapter extends ArrayAdapter<Place>
 
         TextView viewPopulationFemale = (TextView) convertView.findViewById(R.id.place_population_female);
         viewPopulationFemale.setText(String.valueOf(curPlace.getPopulationFemale()));
+
+
+        if (curPlace.getAddress() != null)
+            ((TextView) convertView.findViewById(R.id.place_info_1)).setText(curPlace.getAddress());
+        if (curPlace.getTypes() != null)
+            ((TextView) convertView.findViewById(R.id.place_info_2)).setText(String.valueOf(curPlace.getTypes()));
+        if (curPlace.getRating() != null)
+            ((TextView) convertView.findViewById(R.id.place_info_3)).setText(String.valueOf(curPlace.getRating()));
 
         return convertView;
     }

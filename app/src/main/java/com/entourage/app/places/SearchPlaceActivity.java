@@ -7,33 +7,39 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.entourage.app.R;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchPlaceActivity extends Activity
 {
     private BackgroundLoadingTask mLoadingTask = null;
     private ProgressBar mProgressBar;
+    private TextView mErrorTextView;
+    private ListView mPlacesListView;
+    private PlacesAdapter mPlacesListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pick_picture);
+        setContentView(R.layout.activity_search_place);
         overridePendingTransition(R.anim.activity_enter_from_left, R.anim.activity_leave_from_left);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(getString(R.string.action_back));
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mErrorTextView = (TextView) findViewById(R.id.error_text_view);
+        mPlacesListView = (ListView) findViewById(R.id.placesList);
+        mPlacesListAdapter = new PlacesAdapter(this, new ArrayList<Place>());
+        mPlacesListView.setAdapter(mPlacesListAdapter);
         showProgress(false);
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        super.onBackPressed();
-        this.overridePendingTransition(R.anim.activity_enter_from_right, R.anim.activity_leave_from_right);
     }
 
     @Override
@@ -57,9 +63,17 @@ public class SearchPlaceActivity extends Activity
     }
 
     @Override
+    public void finish()
+    {
+        if (mLoadingTask != null)
+            mLoadingTask.cancel(true);
+        super.finish();
+        this.overridePendingTransition(R.anim.activity_enter_from_right, R.anim.activity_leave_from_right);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         finish();
-        this.overridePendingTransition(R.anim.activity_enter_from_right, R.anim.activity_leave_from_right);
         return true;
     }
 
@@ -84,8 +98,16 @@ public class SearchPlaceActivity extends Activity
     {
         @Override
         public boolean onQueryTextSubmit(String query) {
-            
-            return true;
+            if (mLoadingTask == null)
+            {
+                mLoadingTask = new BackgroundLoadingTask();
+                mLoadingTask.execute(query);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         @Override
@@ -96,14 +118,40 @@ public class SearchPlaceActivity extends Activity
 
     private class BackgroundLoadingTask extends AsyncTask<String, Void, Boolean>
     {
+        private List<Place> mPlacesResult;
+
+        private BackgroundLoadingTask() {
+        }
+
+        @Override
+        protected void onPreExecute() {
+            showProgress(true);
+        }
+
         @Override
         protected Boolean doInBackground(String... params) {
-            return null;
+            if (params.length <= 0)
+                return null;
+            mPlacesResult = PlacesApiUtils.search(params[0]);
+            return mPlacesResult != null;
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mLoadingTask = null;
+            showProgress(false);
+            if (success && !mPlacesResult.isEmpty()) {
+                mPlacesListView.setVisibility(View.VISIBLE);
+                mErrorTextView.setVisibility(View.GONE);
+                mPlacesListAdapter.clear();
+                mPlacesListAdapter.addAll(mPlacesResult);
+                mPlacesListAdapter.notifyDataSetChanged();
+            }
+            else {
+                mPlacesListView.setVisibility(View.GONE);
+                mErrorTextView.setVisibility(View.VISIBLE);
+                mPlacesListAdapter.notifyDataSetInvalidated();
+            }
         }
 
         @Override
